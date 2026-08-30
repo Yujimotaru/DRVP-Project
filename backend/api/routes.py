@@ -45,7 +45,64 @@ router = APIRouter(
 # LOCATION ENDPOINTS
 # ============================================================
 
+@router.get("/map/nodes")
+def get_map_nodes():
+    """Return campus graph nodes with geographic coordinates."""
 
+    from pathlib import Path
+    import pandas as pd
+
+    data_path = (
+        Path(__file__).resolve().parents[1]
+        / "data"
+        / "campus_nodes.csv"
+    )
+
+    if not data_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="campus_nodes.csv not found",
+        )
+
+    df = pd.read_csv(data_path)
+
+    required_columns = [
+        "node_id",
+        "location_id",
+        "name",
+        "latitude",
+        "longitude",
+        "campus",
+        "node_type",
+        "coordinate_source",
+        "coordinate_confidence",
+    ]
+
+    missing_columns = [
+        column
+        for column in required_columns
+        if column not in df.columns
+    ]
+
+    if missing_columns:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Missing columns: {missing_columns}",
+        )
+
+    nodes = df[required_columns].copy()
+
+    nodes = nodes.where(
+        pd.notna(nodes),
+        None,
+    )
+
+    return {
+        "count": len(nodes),
+        "nodes": nodes.to_dict(
+            orient="records"
+        ),
+    }
 @router.get("/locations")
 def locations():
     """

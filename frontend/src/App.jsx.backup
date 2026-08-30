@@ -1,0 +1,1519 @@
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import {
+  Activity,
+  Car,
+  Map,
+  Route,
+  Users,
+  AlertTriangle,
+  RefreshCw,
+  MapPin,
+} from "lucide-react";
+
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+} from "react-leaflet";
+
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import "./App.css";
+
+
+// ============================================================
+// CONFIGURATION
+// ============================================================
+
+const API_BASE = "http://127.0.0.1:8000";
+
+
+// ============================================================
+// VEHICLE ROUTE COLOR PALETTE
+// ============================================================
+// A fixed, visually distinguishable palette. Colors are assigned
+// to vehicle IDs by index (with wrap-around) so every vehicle
+// gets a consistent, distinct line color.
+
+const VEHICLE_ROUTE_COLORS = [
+  "#e6194b",
+  "#3cb44b",
+  "#4363d8",
+  "#f58231",
+  "#911eb4",
+  "#42d4f4",
+  "#f032e6",
+  "#bfef45",
+  "#fabed4",
+  "#469990",
+  "#9a6324",
+  "#800000",
+  "#808000",
+  "#000075",
+  "#a9a9a9",
+];
+
+function colorForVehicle(vehicleId, vehicleIndex) {
+  if (vehicleIndex >= 0) {
+    return VEHICLE_ROUTE_COLORS[
+      vehicleIndex % VEHICLE_ROUTE_COLORS.length
+    ];
+  }
+
+  // Fallback: derive a stable index from the id string.
+  let hash = 0;
+  const id = String(vehicleId || "");
+
+  for (let i = 0; i < id.length; i += 1) {
+    hash = (hash * 31 + id.charCodeAt(i)) % 997;
+  }
+
+  return VEHICLE_ROUTE_COLORS[hash % VEHICLE_ROUTE_COLORS.length];
+}
+
+
+// ============================================================
+// FIX LEAFLET DEFAULT MARKER ICON
+// ============================================================
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+
+// ============================================================
+// MAIN APP
+// ============================================================
+
+function App() {
+  const [health, setHealth] = useState(null);
+  const [demand, setDemand] = useState(null);
+  const [optimization, setOptimization] = useState(null);
+  const [locations, setLocations] = useState(null);
+  const [nodes, setNodes] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Toggle for the optimized vehicle route layer on the map.
+  const [showRoutes, setShowRoutes] = useState(true);
+
+
+  // ==========================================================
+  // LOAD DASHBOARD DATA
+  // ==========================================================
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const [
+        healthResponse,
+        demandResponse,
+        optimizationResponse,
+        locationsResponse,
+        nodesResponse,
+      ] = await Promise.all([
+        axios.get(`${API_BASE}/api/health`),
+
+        axios.get(
+          `${API_BASE}/api/demand/summary`
+        ),
+
+        axios.get(
+          `${API_BASE}/api/optimization/results`
+        ),
+
+        axios.get(
+          `${API_BASE}/api/locations`
+        ),
+
+        axios.get(
+          `${API_BASE}/api/map/nodes`
+        ),
+      ]);
+
+
+      setHealth(
+        healthResponse.data
+      );
+
+      setDemand(
+        demandResponse.data
+      );
+
+      setOptimization(
+        optimizationResponse.data
+      );
+
+      setLocations(
+        locationsResponse.data
+      );
+
+      setNodes(
+        nodesResponse.data?.nodes || []
+      );
+
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err.response?.data?.detail ||
+        "Unable to load dashboard data from the backend."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // ==========================================================
+  // INITIAL LOAD
+  // ==========================================================
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+
+  // ==========================================================
+  // OPTIMIZATION DATA
+  // ==========================================================
+
+  const optimizationSummary =
+    optimization?.optimization_summary ||
+    optimization?.summary ||
+    {};
+
+
+  const vehicleAssignments =
+    optimization?.vehicle_assignments ||
+    optimization?.assignments ||
+    [];
+
+
+  const optimizedRoutes =
+    optimization?.optimized_routes ||
+    optimization?.routes ||
+    [];
+
+
+  const totalVehicles =
+    optimizationSummary.vehicle_count ??
+    optimization?.vehicle_count ??
+    vehicleAssignments.length ??
+    0;
+
+
+  const totalRequests =
+    optimizationSummary.total_requests ??
+    optimization?.total_requests ??
+    0;
+
+
+  const servedRequests =
+    optimizationSummary.served_requests ??
+    optimization?.served_requests ??
+    0;
+
+
+  const unservedRequests =
+    optimizationSummary.unserved_requests ??
+    optimization?.unserved_requests ??
+    0;
+
+
+  const poolingPairs =
+    optimizationSummary.poolable_pair_count ??
+    optimization?.poolable_pair_count ??
+    0;
+
+
+  const locationCount =
+    locations?.count ??
+    locations?.locations?.length ??
+    nodes.length ??
+    0;
+
+
+  // ==========================================================
+  // MAP CENTER
+  // ==========================================================
+
+  const validNodes = nodes.filter(
+    (node) =>
+      typeof node.latitude === "number" &&
+      typeof node.longitude === "number"
+  );
+
+
+  const mapCenter =
+    validNodes.length > 0
+      ? [
+        validNodes.reduce(
+          (sum, node) =>
+            sum + node.latitude,
+          0
+        ) / validNodes.length,
+
+        validNodes.reduce(
+          (sum, node) =>
+            sum + node.longitude,
+          0
+        ) / validNodes.length,
+      ]
+      : [13.0105, 74.7945];
+
+
+  // ==========================================================
+  // NODE LOOKUP (location_id -> node details)
+  // ==========================================================
+  // Built from the /api/map/nodes response so we never hardcode
+  // campus locations. Keyed by location_id since optimized_routes
+  // references origin_id/destination_id, which correspond to
+  // location_id on the map nodes.
+
+  const nodesByLocationId = useMemo(() => {
+    const lookup = {};
+
+    nodes.forEach((node) => {
+      if (node && node.location_id) {
+        lookup[node.location_id] = node;
+      }
+    });
+
+    return lookup;
+  }, [nodes]);
+
+
+  // ==========================================================
+  // VEHICLE ROUTES (grouped, sorted, and mapped to coordinates)
+  // ==========================================================
+  // Groups optimized_routes by vehicle_id, sorts each group by
+  // pickup_order, and resolves origin/destination coordinates
+  // from the node lookup. Assignments with missing/unresolvable
+  // coordinates are skipped for the line geometry (but still
+  // counted in the legend) so a single bad record cannot crash
+  // the map.
+
+  const vehicleRouteGroups = useMemo(() => {
+    const groups = {};
+
+    optimizedRoutes.forEach((assignment) => {
+      const vehicleId = assignment.vehicle_id;
+
+      if (!vehicleId) {
+        return;
+      }
+
+      if (!groups[vehicleId]) {
+        groups[vehicleId] = [];
+      }
+
+      groups[vehicleId].push(assignment);
+    });
+
+    Object.values(groups).forEach((assignments) => {
+      assignments.sort(
+        (a, b) =>
+          (a.pickup_order ?? 0) - (b.pickup_order ?? 0)
+      );
+    });
+
+    return groups;
+  }, [optimizedRoutes]);
+
+
+  const vehicleRoutes = useMemo(() => {
+    const vehicleIds = Object.keys(vehicleRouteGroups).sort();
+
+    return vehicleIds.map((vehicleId, index) => {
+      const assignments = vehicleRouteGroups[vehicleId];
+      const color = colorForVehicle(vehicleId, index);
+
+      const segments = [];
+      let totalDistance = 0;
+      let pooledCount = 0;
+      let missingCoordinateCount = 0;
+
+      assignments.forEach((assignment) => {
+        const originNode =
+          nodesByLocationId[assignment.origin_id];
+
+        const destinationNode =
+          nodesByLocationId[assignment.destination_id];
+
+        if (typeof assignment.distance === "number") {
+          totalDistance += assignment.distance;
+        }
+
+        if (
+          assignment.pooled === true ||
+          assignment.pooled === "True" ||
+          assignment.pooled === "true"
+        ) {
+          pooledCount += 1;
+        }
+
+        const originValid =
+          originNode &&
+          typeof originNode.latitude === "number" &&
+          typeof originNode.longitude === "number";
+
+        const destinationValid =
+          destinationNode &&
+          typeof destinationNode.latitude === "number" &&
+          typeof destinationNode.longitude === "number";
+
+        if (!originValid || !destinationValid) {
+          missingCoordinateCount += 1;
+          return;
+        }
+
+        segments.push({
+          assignment,
+          originNode,
+          destinationNode,
+          positions: [
+            [originNode.latitude, originNode.longitude],
+            [
+              destinationNode.latitude,
+              destinationNode.longitude,
+            ],
+          ],
+        });
+      });
+
+      return {
+        vehicleId,
+        color,
+        assignments,
+        segments,
+        totalDistance,
+        pooledCount,
+        missingCoordinateCount,
+        assignedRequestCount: assignments.length,
+      };
+    });
+  }, [vehicleRouteGroups, nodesByLocationId]);
+
+
+  // ==========================================================
+  // ROUTE OPTIMIZATION DASHBOARD SUMMARY
+  // ==========================================================
+  // These totals are derived entirely from the optimized_routes
+  // records returned by the backend (never hardcoded).
+
+  const routeSummary = useMemo(() => {
+    const totalOptimizedVehicles = vehicleRoutes.length;
+    const totalOptimizedRequests = optimizedRoutes.length;
+
+    const totalPooledRequests = optimizedRoutes.filter(
+      (assignment) =>
+        assignment.pooled === true ||
+        assignment.pooled === "True" ||
+        assignment.pooled === "true"
+    ).length;
+
+    const totalOptimizedDistance = optimizedRoutes.reduce(
+      (sum, assignment) =>
+        sum +
+        (typeof assignment.distance === "number"
+          ? assignment.distance
+          : 0),
+      0
+    );
+
+    return {
+      totalOptimizedVehicles,
+      totalOptimizedRequests,
+      totalPooledRequests,
+      totalOptimizedDistance,
+    };
+  }, [vehicleRoutes, optimizedRoutes]);
+
+
+  return (
+    <div className="app">
+
+      {/* ======================================================
+          TOP BAR
+      ====================================================== */}
+
+      <header className="topbar">
+
+        <div>
+
+          <h1>
+            DVRP Dashboard
+          </h1>
+
+          <p>
+            Dynamic Vehicle Routing & Ride Pooling
+          </p>
+
+        </div>
+
+
+        <button
+          className="refresh-button"
+          onClick={loadDashboard}
+          disabled={loading}
+        >
+
+          <RefreshCw
+            size={18}
+          />
+
+          {loading
+            ? "Loading..."
+            : "Refresh"}
+
+        </button>
+
+      </header>
+
+
+      <main className="dashboard">
+
+
+        {/* ====================================================
+            SYSTEM STATUS
+        ==================================================== */}
+
+        <section className="status-banner">
+
+          <div className="status-icon">
+
+            <Activity
+              size={24}
+            />
+
+          </div>
+
+
+          <div>
+
+            <h2>
+              System Status
+            </h2>
+
+
+            {loading && (
+              <p>
+                Loading backend data...
+              </p>
+            )}
+
+
+            {!loading &&
+              !error &&
+              health && (
+                <p className="success-text">
+                  Backend connected successfully
+                </p>
+              )}
+
+
+            {!loading && error && (
+              <p className="error-text">
+                {error}
+              </p>
+            )}
+
+          </div>
+
+        </section>
+
+
+        {/* ====================================================
+            MAIN STATISTICS
+        ==================================================== */}
+
+        <section className="stats-grid">
+
+          <StatCard
+            icon={<Users />}
+            title="Ride Requests"
+            value={totalRequests}
+            subtitle="Optimization input"
+          />
+
+
+          <StatCard
+            icon={<Car />}
+            title="Vehicles"
+            value={totalVehicles}
+            subtitle="Vehicles used"
+          />
+
+
+          <StatCard
+            icon={<Route />}
+            title="Served Requests"
+            value={servedRequests}
+            subtitle={`${unservedRequests} unserved`}
+          />
+
+
+          <StatCard
+            icon={<Map />}
+            title="Campus Locations"
+            value={locationCount}
+            subtitle="Available locations"
+          />
+
+        </section>
+
+
+        {/* ====================================================
+            ROUTE OPTIMIZATION SUMMARY
+            (derived entirely from /api/optimization/results)
+        ==================================================== */}
+
+        <section className="stats-grid">
+
+          <StatCard
+            icon={<Car />}
+            title="Routed Vehicles"
+            value={routeSummary.totalOptimizedVehicles}
+            subtitle="Vehicles with a mapped route"
+          />
+
+          <StatCard
+            icon={<Users />}
+            title="Optimized Requests"
+            value={routeSummary.totalOptimizedRequests}
+            subtitle="Requests placed on routes"
+          />
+
+          <StatCard
+            icon={<Route />}
+            title="Pooled Requests"
+            value={routeSummary.totalPooledRequests}
+            subtitle="Requests sharing a vehicle"
+          />
+
+          <StatCard
+            icon={<Map />}
+            title="Total Route Distance"
+            value={`${routeSummary.totalOptimizedDistance.toFixed(
+              2
+            )} km`}
+            subtitle="Sum of optimized route legs"
+          />
+
+        </section>
+
+
+        {/* ====================================================
+            OPTIMIZATION + DEMAND
+        ==================================================== */}
+
+        <section className="content-grid">
+
+          <DashboardCard
+            title="Optimization Results"
+            icon={<Route />}
+          >
+
+            <div className="metric-list">
+
+              <MetricRow
+                label="Total requests"
+                value={totalRequests}
+              />
+
+              <MetricRow
+                label="Served requests"
+                value={servedRequests}
+              />
+
+              <MetricRow
+                label="Unserved requests"
+                value={unservedRequests}
+              />
+
+              <MetricRow
+                label="Vehicles used"
+                value={totalVehicles}
+              />
+
+              <MetricRow
+                label="Poolable pairs"
+                value={poolingPairs}
+              />
+
+            </div>
+
+          </DashboardCard>
+
+
+          <DashboardCard
+            title="Demand Analytics"
+            icon={<Activity />}
+          >
+
+            <DemandSummary
+              demand={demand}
+            />
+
+          </DashboardCard>
+
+        </section>
+
+
+        {/* ====================================================
+            ROUTES + FLEET
+        ==================================================== */}
+
+        <section className="content-grid">
+
+          <DashboardCard
+            title="Optimized Routes"
+            icon={<Map />}
+          >
+
+            <div className="metric-list">
+
+              <MetricRow
+                label="Optimized route records"
+                value={
+                  optimizedRoutes.length
+                }
+              />
+
+              <MetricRow
+                label="Vehicle assignment records"
+                value={
+                  vehicleAssignments.length
+                }
+              />
+
+              <MetricRow
+                label="Pooling pairs"
+                value={poolingPairs}
+              />
+
+            </div>
+
+          </DashboardCard>
+
+
+          <DashboardCard
+            title="Fleet Status"
+            icon={<Car />}
+          >
+
+            <div className="fleet-status">
+
+              <div className="fleet-number">
+                {totalVehicles}
+              </div>
+
+
+              <div>
+
+                <h3>
+                  Active vehicles
+                </h3>
+
+                <p>
+                  Vehicles participating in
+                  the latest optimization.
+                </p>
+
+              </div>
+
+            </div>
+
+          </DashboardCard>
+
+        </section>
+
+
+        {/* ====================================================
+            REAL CAMPUS MAP
+        ==================================================== */}
+
+        <section className="content-grid">
+
+          <DashboardCard
+            title="Campus Route Map"
+            icon={<Map />}
+            wide
+          >
+
+            <div
+              className="map-container"
+              style={{
+                height: "600px",
+                width: "100%",
+                borderRadius: "12px",
+                overflow: "hidden",
+              }}
+            >
+
+              {validNodes.length > 0 ? (
+
+                <MapContainer
+                  center={mapCenter}
+                  zoom={16}
+                  scrollWheelZoom={true}
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                  }}
+                >
+
+                  <TileLayer
+                    attribution='&copy; OpenStreetMap contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+
+
+                  {/* =========================================
+                      CAMPUS NODES
+                  ========================================= */}
+
+                  {validNodes.map(
+                    (node) => (
+
+                      <Marker
+                        key={
+                          node.node_id ||
+                          node.location_id
+                        }
+                        position={[
+                          node.latitude,
+                          node.longitude,
+                        ]}
+                      >
+
+                        <Popup>
+
+                          <div
+                            style={{
+                              minWidth:
+                                "200px",
+                            }}
+                          >
+
+                            <h3
+                              style={{
+                                marginTop: 0,
+                              }}
+                            >
+                              {node.name}
+                            </h3>
+
+
+                            <p>
+                              <strong>
+                                Location:
+                              </strong>{" "}
+                              {node.location_id}
+                            </p>
+
+
+                            <p>
+                              <strong>
+                                Type:
+                              </strong>{" "}
+                              {node.node_type}
+                            </p>
+
+
+                            <p>
+                              <strong>
+                                Campus:
+                              </strong>{" "}
+                              {node.campus}
+                            </p>
+
+
+                            <p>
+                              <strong>
+                                Coordinates:
+                              </strong>
+                              <br />
+                              {node.latitude.toFixed(
+                                6
+                              )}
+                              ,{" "}
+                              {node.longitude.toFixed(
+                                6
+                              )}
+                            </p>
+
+                          </div>
+
+                        </Popup>
+
+                      </Marker>
+
+                    )
+                  )}
+
+
+                  {/* =========================================
+                      OPTIMIZED VEHICLE ROUTES
+                      (toggleable layer, one color per vehicle)
+                  ========================================= */}
+
+                  {showRoutes &&
+                    vehicleRoutes.map((vehicleRoute) =>
+                      vehicleRoute.segments.map(
+                        (segment, segmentIndex) => (
+
+                          <Polyline
+                            key={`${vehicleRoute.vehicleId}-${segmentIndex}`}
+                            positions={segment.positions}
+                            pathOptions={{
+                              color: vehicleRoute.color,
+                              weight: 4,
+                              opacity: 0.85,
+                            }}
+                          >
+
+                            <Popup>
+
+                              <div
+                                style={{
+                                  minWidth: "220px",
+                                }}
+                              >
+
+                                <h3
+                                  style={{
+                                    marginTop: 0,
+                                    color:
+                                      vehicleRoute.color,
+                                  }}
+                                >
+                                  {
+                                    vehicleRoute.vehicleId
+                                  }
+                                </h3>
+
+                                <p>
+                                  <strong>
+                                    Request ID:
+                                  </strong>{" "}
+                                  {
+                                    segment.assignment
+                                      .request_id
+                                  }
+                                </p>
+
+                                <p>
+                                  <strong>
+                                    Pickup order:
+                                  </strong>{" "}
+                                  {
+                                    segment.assignment
+                                      .pickup_order
+                                  }
+                                </p>
+
+                                <p>
+                                  <strong>
+                                    Route:
+                                  </strong>{" "}
+                                  {segment.originNode.name}
+                                  {" → "}
+                                  {
+                                    segment.destinationNode
+                                      .name
+                                  }
+                                </p>
+
+                                <p>
+                                  <strong>
+                                    Passenger count:
+                                  </strong>{" "}
+                                  {
+                                    segment.assignment
+                                      .passenger_count
+                                  }
+                                </p>
+
+                                <p>
+                                  <strong>
+                                    Distance:
+                                  </strong>{" "}
+                                  {
+                                    segment.assignment
+                                      .distance
+                                  }{" "}
+                                  km
+                                </p>
+
+                                <p>
+                                  <strong>
+                                    Travel time:
+                                  </strong>{" "}
+                                  {
+                                    segment.assignment
+                                      .travel_time
+                                  }{" "}
+                                  min
+                                </p>
+
+                                <p>
+                                  <strong>
+                                    Pooled:
+                                  </strong>{" "}
+                                  {segment.assignment
+                                    .pooled === true ||
+                                  segment.assignment
+                                    .pooled === "True"
+                                    ? "Yes"
+                                    : "No"}
+                                </p>
+
+                              </div>
+
+                            </Popup>
+
+                          </Polyline>
+
+                        )
+                      )
+                    )}
+
+                </MapContainer>
+
+              ) : (
+
+                <div
+                  className="map-placeholder"
+                >
+
+                  <MapPin
+                    size={52}
+                  />
+
+                  <h3>
+                    Loading campus map...
+                  </h3>
+
+                  <p>
+                    Waiting for campus node
+                    data from the backend.
+                  </p>
+
+                </div>
+
+              )}
+
+            </div>
+
+
+            <div
+              style={{
+                marginTop: "12px",
+                display: "flex",
+                gap: "20px",
+                alignItems: "center",
+                flexWrap: "wrap",
+              }}
+            >
+
+              <span>
+                📍{" "}
+                <strong>
+                  {validNodes.length}
+                </strong>{" "}
+                mapped locations
+              </span>
+
+
+              <span>
+                🏫 East / West campus
+              </span>
+
+
+              <span>
+                🛣️ Routing graph ready
+              </span>
+
+
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  cursor: "pointer",
+                }}
+              >
+
+                <input
+                  type="checkbox"
+                  checked={showRoutes}
+                  onChange={(event) =>
+                    setShowRoutes(
+                      event.target.checked
+                    )
+                  }
+                />
+
+                🚗 Show optimized routes
+
+              </label>
+
+            </div>
+
+
+            {/* ==================================================
+                VEHICLE ROUTE LEGEND
+            ================================================== */}
+
+            {vehicleRoutes.length > 0 && (
+
+              <div
+                className="route-legend"
+                style={{
+                  marginTop: "16px",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "10px",
+                  padding: "14px 16px",
+                }}
+              >
+
+                <h3
+                  style={{
+                    margin: "0 0 10px",
+                    fontSize: "15px",
+                  }}
+                >
+                  Vehicle Route Legend
+                </h3>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fit, minmax(230px, 1fr))",
+                    gap: "10px",
+                  }}
+                >
+
+                  {vehicleRoutes.map((vehicleRoute) => (
+
+                    <div
+                      key={vehicleRoute.vehicleId}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "10px",
+                        padding: "8px 10px",
+                        border: "1px solid #eef0f3",
+                        borderRadius: "8px",
+                      }}
+                    >
+
+                      <span
+                        style={{
+                          display: "inline-block",
+                          width: "14px",
+                          height: "14px",
+                          marginTop: "3px",
+                          borderRadius: "3px",
+                          backgroundColor:
+                            vehicleRoute.color,
+                          flexShrink: 0,
+                        }}
+                      />
+
+                      <div>
+
+                        <strong>
+                          {vehicleRoute.vehicleId}
+                        </strong>
+
+                        <div
+                          style={{
+                            fontSize: "0.82rem",
+                            color: "#6b7280",
+                            marginTop: "3px",
+                          }}
+                        >
+                          {
+                            vehicleRoute.assignedRequestCount
+                          }{" "}
+                          request
+                          {vehicleRoute.assignedRequestCount ===
+                          1
+                            ? ""
+                            : "s"}
+                          {" • "}
+                          {vehicleRoute.totalDistance.toFixed(
+                            2
+                          )}{" "}
+                          km
+                          {" • "}
+                          {vehicleRoute.pooledCount} pooled
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  ))}
+
+                </div>
+
+              </div>
+
+            )}
+
+          </DashboardCard>
+
+        </section>
+
+
+        {/* ====================================================
+            LOCATION LIST
+        ==================================================== */}
+
+        <section className="content-grid">
+
+          <DashboardCard
+            title="Campus Locations"
+            icon={<MapPin />}
+            wide
+          >
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: "10px",
+                maxHeight: "400px",
+                overflowY: "auto",
+              }}
+            >
+
+              {validNodes.map(
+                (node) => (
+
+                  <div
+                    key={
+                      node.node_id ||
+                      node.location_id
+                    }
+                    style={{
+                      padding: "12px",
+                      border:
+                        "1px solid #ddd",
+                      borderRadius:
+                        "8px",
+                    }}
+                  >
+
+                    <strong>
+                      {node.name}
+                    </strong>
+
+                    <div
+                      style={{
+                        fontSize:
+                          "0.85rem",
+                        marginTop:
+                          "4px",
+                      }}
+                    >
+                      {node.node_type}
+                      {" • "}
+                      {node.campus}
+                    </div>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
+          </DashboardCard>
+
+        </section>
+
+
+        {/* ====================================================
+            BACKEND RESPONSE
+        ==================================================== */}
+
+        {health && (
+
+          <section className="backend-response">
+
+            <h2>
+              Backend Connection
+            </h2>
+
+            <pre>
+              {JSON.stringify(
+                health,
+                null,
+                2
+              )}
+            </pre>
+
+          </section>
+
+        )}
+
+
+        {/* ====================================================
+            ERROR
+        ==================================================== */}
+
+        {error && (
+
+          <section className="warning">
+
+            <AlertTriangle
+              size={20}
+            />
+
+            <span>
+              {error}
+            </span>
+
+          </section>
+
+        )}
+
+      </main>
+
+    </div>
+  );
+}
+
+
+// ============================================================
+// STAT CARD
+// ============================================================
+
+function StatCard({
+  icon,
+  title,
+  value,
+  subtitle,
+}) {
+
+  return (
+
+    <div className="stat-card">
+
+      <div className="stat-icon">
+        {icon}
+      </div>
+
+
+      <div>
+
+        <p className="stat-title">
+          {title}
+        </p>
+
+        <h2>
+          {value}
+        </h2>
+
+        <p className="stat-subtitle">
+          {subtitle}
+        </p>
+
+      </div>
+
+    </div>
+
+  );
+}
+
+
+// ============================================================
+// DASHBOARD CARD
+// ============================================================
+
+function DashboardCard({
+  title,
+  icon,
+  children,
+  wide = false,
+}) {
+
+  return (
+
+    <div
+      className={
+        wide
+          ? "dashboard-card wide"
+          : "dashboard-card"
+      }
+    >
+
+      <div className="card-header">
+
+        <div className="card-title">
+
+          {icon}
+
+          <h2>
+            {title}
+          </h2>
+
+        </div>
+
+      </div>
+
+
+      {children}
+
+    </div>
+
+  );
+}
+
+
+// ============================================================
+// METRIC ROW
+// ============================================================
+
+function MetricRow({
+  label,
+  value,
+}) {
+
+  return (
+
+    <div className="metric-row">
+
+      <span>
+        {label}
+      </span>
+
+      <strong>
+        {value}
+      </strong>
+
+    </div>
+
+  );
+}
+
+
+// ============================================================
+// DEMAND SUMMARY
+// ============================================================
+
+function DemandSummary({
+  demand,
+}) {
+
+  if (!demand) {
+
+    return (
+
+      <div className="placeholder">
+
+        <Activity
+          size={42}
+        />
+
+        <h3>
+          No demand data
+        </h3>
+
+        <p>
+          Demand analytics could not
+          be loaded.
+        </p>
+
+      </div>
+
+    );
+
+  }
+
+
+  const entries =
+    Object.entries(demand);
+
+
+  return (
+
+    <div className="demand-summary">
+
+      {entries
+        .slice(0, 6)
+        .map(
+          ([key, value]) => (
+
+            <MetricRow
+              key={key}
+              label={formatLabel(key)}
+              value={
+                typeof value ===
+                  "object"
+                  ? JSON.stringify(
+                    value
+                  )
+                  : value
+              }
+            />
+
+          )
+        )}
+
+    </div>
+
+  );
+
+}
+
+
+// ============================================================
+// FORMAT LABEL
+// ============================================================
+
+function formatLabel(
+  value
+) {
+
+  return value
+    .replaceAll(
+      "_",
+      " "
+    )
+    .replace(
+      /\b\w/g,
+      (letter) =>
+        letter.toUpperCase()
+    );
+
+}
+
+
+// ============================================================
+// EXPORT
+// ============================================================
+
+export default App;
