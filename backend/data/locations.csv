@@ -1,0 +1,55 @@
+location_id,name,type,campus,subzone,capacity,peak_demand_weight,morning_demand_weight,lunch_demand_weight,evening_demand_weight,night_demand_weight
+loc_main_gate,Main Gate,gate,EAST,East Campus - Entrance,100,0.90,0.85,0.40,0.80,0.30
+loc_main_building,Main Building,administrative,EAST,East Campus - Academic Core,300,0.85,0.80,0.50,0.60,0.15
+loc_central_library,Central Library,library,EAST,East Campus - Academic Core,500,0.90,0.45,0.35,0.90,0.65
+loc_e_library,e-Library,library,EAST,East Campus - Academic Core,400,0.85,0.40,0.30,0.85,0.60
+loc_boys_coop,Boys Cooperative Society,cooperative_society,EAST,East Campus - Boys Hostels,80,0.75,0.30,0.45,0.75,0.40
+loc_girls_coop,Girls Cooperative Society,cooperative_society,EAST,East Campus - Girls Hostels,80,0.75,0.30,0.45,0.75,0.40
+loc_suprabha_boys,Suprabha – Boys Side,canteen,EAST,East Campus - Boys Hostels,120,0.90,0.55,0.60,0.90,0.85
+loc_suprabha_girls,Suprabha – Girls Side,canteen,EAST,East Campus - Girls Hostels,120,0.90,0.55,0.60,0.90,0.85
+loc_lhc_a,LHC-A,lecture_hall,EAST,East Campus - Academic Core,600,0.95,0.95,0.40,0.55,0.10
+loc_lhc_b,LHC-B,lecture_hall,EAST,East Campus - Academic Core,600,0.95,0.95,0.40,0.55,0.10
+dept_cse,Computer Science & Engineering,department,WEST,West Campus - Tech Cluster,400,0.90,0.85,0.40,0.60,0.15
+dept_ece,Electronics & Communication Engineering,department,WEST,West Campus - Tech Cluster,400,0.90,0.85,0.40,0.60,0.15
+dept_eee,Electrical & Electronics Engineering,department,WEST,West Campus - Tech Cluster,350,0.85,0.85,0.40,0.55,0.15
+dept_it,Information Technology,department,WEST,West Campus - Tech Cluster,350,0.85,0.85,0.40,0.55,0.15
+dept_mech,Mechanical Engineering,department,EAST,East Campus - Core Engineering,450,0.85,0.85,0.40,0.50,0.10
+dept_civil,Civil Engineering,department,EAST,East Campus - Core Engineering,400,0.85,0.85,0.40,0.50,0.10
+dept_chem,Chemical Engineering,department,EAST,East Campus - Core Engineering,300,0.80,0.80,0.40,0.50,0.10
+dept_mme,Metallurgical and Materials Engineering,department,EAST,East Campus - Core Engineering,300,0.80,0.80,0.40,0.50,0.10
+dept_mining,Mining Engineering,department,EAST,East Campus - Core Engineering,250,0.80,0.80,0.40,0.50,0.10
+dept_macs,Mathematical and Computational Sciences,department,EAST,East Campus - Sciences,250,0.80,0.80,0.40,0.50,0.10
+dept_physics,Physics,department,EAST,East Campus - Sciences,200,0.75,0.75,0.35,0.45,0.10
+dept_chemistry,Chemistry,department,EAST,East Campus - Sciences,200,0.75,0.75,0.35,0.45,0.10
+dept_hssm,"School of Humanities, Social Sciences and Management",department,EAST,East Campus - Academic Core,200,0.75,0.75,0.35,0.45,0.10
+dept_wroe,Water Resources and Ocean Engineering,department,EAST,East Campus - Core Engineering,200,0.75,0.75,0.35,0.45,0.10
+hostel_b_block1,Block 1 (Karavali),hostel_boys,EAST,East Campus - Boys Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_b_block2,Block 2 (Aravali),hostel_boys,EAST,East Campus - Boys Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_b_block3,Block 3 (Vindhya),hostel_boys,EAST,East Campus - Boys Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_b_block4,Block 4 (Satpura),hostel_boys,EAST,East Campus - Boys Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_b_block5,Block 5 (Nilgiri),hostel_boys,EAST,East Campus - Boys Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_b_block6,Block 6 (Pushpagiri),hostel_boys,EAST,East Campus - Boys Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_b_block7,Block 7 (Sahyadri),hostel_boys,EAST,East Campus - Boys Hostels,300,0.85,0.85,0.25,0.80,0.50
+hostel_b_block8,Block 8 (Trishul),hostel_boys,EAST,East Campus - Boys Hostels,300,0.85,0.85,0.25,0.80,0.50
+hostel_b_mt1,Mega Tower 1 (Everest),hostel_boys,EAST,East Campus - Boys Hostels,500,0.90,0.90,0.30,0.85,0.55
+hostel_b_mt2,Mega Tower 2 (Himalaya),hostel_boys,EAST,East Campus - Boys Hostels,500,0.90,0.90,0.30,0.85,0.55
+hostel_b_mt3,Mega Tower 3 (Kailash),hostel_boys,EAST,East Campus - Boys Hostels,500,0.90,0.90,0.30,0.85,0.55
+hostel_b_brahmagiri,Brahmagiri PG Hostel,hostel_boys,EAST,East Campus - Boys Hostels,350,0.80,0.80,0.30,0.75,0.45
+hostel_b_shivalik,Shivalik (XI Hostel),hostel_boys,EAST,East Campus - Boys Hostels,300,0.80,0.80,0.30,0.75,0.45
+hostel_g_gh1,GH 1 (Ganga),hostel_girls,EAST,East Campus - Girls Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_g_gh2,GH 2 (Kaveri),hostel_girls,EAST,East Campus - Girls Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_g_gh3,GH 3 (Yamuna),hostel_girls,EAST,East Campus - Girls Hostels,250,0.85,0.85,0.25,0.80,0.50
+hostel_g_gh4,GH 4 (Sharavathi),hostel_girls,EAST,East Campus - Girls Hostels,300,0.85,0.85,0.25,0.80,0.50
+hostel_g_gh5,GH 5 (Netravathi),hostel_girls,EAST,East Campus - Girls Hostels,350,0.85,0.85,0.25,0.80,0.50
+hostel_g_gh6,GH 6 (Godavari),hostel_girls,EAST,East Campus - Girls Hostels,350,0.85,0.85,0.25,0.80,0.50
+mess_gb,GB Mess,mess,EAST,East Campus - Dining Zone,350,0.90,0.75,0.95,0.85,0.15
+mess_pg_new_brahmagiri,PG-New Brahmagiri,mess,EAST,East Campus - Dining Zone,300,0.90,0.75,0.90,0.85,0.15
+mess_pg_pushpagiri,PG-Pushpagiri,mess,EAST,East Campus - Dining Zone,300,0.90,0.75,0.90,0.85,0.15
+mess_b1_karavali,B1: Karavali,mess,EAST,East Campus - Dining Zone,250,0.90,0.75,0.90,0.85,0.15
+mess_b2_aravali,B2: Aravali,mess,EAST,East Campus - Dining Zone,250,0.90,0.75,0.90,0.85,0.15
+mess_b3_vindhya,B3: Vindhya,mess,EAST,East Campus - Dining Zone,250,0.90,0.75,0.90,0.85,0.15
+mess_b4_satpura,B4: Satpura,mess,EAST,East Campus - Dining Zone,250,0.90,0.75,0.90,0.85,0.15
+mess_b5_nilgiri,B5: Nilgiri,mess,EAST,East Campus - Dining Zone,250,0.90,0.75,0.90,0.85,0.15
+mess_b7_sahyadri,B7: Sahyadri,mess,EAST,East Campus - Dining Zone,300,0.90,0.75,0.90,0.85,0.15
+mess_b8_trishul,B8: Trishul,mess,EAST,East Campus - Dining Zone,300,0.90,0.75,0.90,0.85,0.15
+mess_mega,Mega Mess,mess,EAST,East Campus - Dining Zone,650,0.95,0.80,0.95,0.90,0.20

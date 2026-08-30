@@ -1,0 +1,55 @@
+node_id,location_id,name,latitude,longitude,campus,node_type,coordinate_source,coordinate_confidence
+node_main_gate,loc_main_gate,Main Gate,13.010979,74.793171,EAST,gate,openstreetmap,high
+node_main_building,loc_main_building,Main Building,13.010812,74.794236,EAST,administrative,openstreetmap,high
+node_central_library,loc_central_library,Central Library,13.009956,74.794230,EAST,library,openstreetmap,high
+node_e_library,loc_e_library,e-Library,13.010037,74.794837,EAST,library,openstreetmap,high
+node_boys_coop,loc_boys_coop,Boys Cooperative Society,13.008622,74.794132,EAST,cooperative_society,openstreetmap,high
+node_girls_coop,loc_girls_coop,Girls Cooperative Society,13.012789,74.796445,EAST,cooperative_society,openstreetmap,high
+node_suprabha_boys,loc_suprabha_boys,Suprabha – Boys Side,13.005995,74.794973,EAST,canteen,openstreetmap,high
+node_suprabha_girls,loc_suprabha_girls,Suprabha – Girls Side,13.012750,74.796450,EAST,canteen,estimated,medium
+node_lhc_a,loc_lhc_a,LHC-A,13.009850,74.794400,EAST,lecture_hall,estimated,medium
+node_lhc_b,loc_lhc_b,LHC-B,13.009377,74.794455,EAST,lecture_hall,openstreetmap,high
+node_dept_cse,dept_cse,Computer Science & Engineering,13.011600,74.792200,WEST,department,estimated,high
+node_dept_ece,dept_ece,Electronics & Communication Engineering,13.011483,74.792160,WEST,department,openstreetmap,high
+node_dept_eee,dept_eee,Electrical & Electronics Engineering,13.011079,74.792198,WEST,department,openstreetmap,high
+node_dept_it,dept_it,Information Technology,13.011234,74.792264,WEST,department,openstreetmap,high
+node_dept_mech,dept_mech,Mechanical Engineering,13.011956,74.795914,EAST,department,openstreetmap,high
+node_dept_civil,dept_civil,Civil Engineering,13.012131,74.793720,EAST,department,openstreetmap,high
+node_dept_chem,dept_chem,Chemical Engineering,13.011202,74.796210,EAST,department,openstreetmap,high
+node_dept_mme,dept_mme,Metallurgical and Materials Engineering,13.010590,74.795075,EAST,department,openstreetmap,high
+node_dept_mining,dept_mining,Mining Engineering,13.011802,74.793931,EAST,department,openstreetmap,high
+node_dept_macs,dept_macs,Mathematical and Computational Sciences,13.009574,74.794280,EAST,department,openstreetmap,high
+node_dept_physics,dept_physics,Physics,13.008759,74.794755,EAST,department,openstreetmap,high
+node_dept_chemistry,dept_chemistry,Chemistry,13.009040,74.795030,EAST,department,openstreetmap,high
+node_dept_hssm,dept_hssm,"School of Humanities, Social Sciences and Management",13.008906,74.794595,EAST,department,openstreetmap,high
+node_dept_wroe,dept_wroe,Water Resources and Ocean Engineering,13.012295,74.794580,EAST,department,openstreetmap,high
+node_hostel_b_block1,hostel_b_block1,Block 1 (Karavali),13.008033,74.797379,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_block2,hostel_b_block2,Block 2 (Aravali),13.007186,74.797248,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_block3,hostel_b_block3,Block 3 (Vindhya),13.006464,74.796472,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_block4,hostel_b_block4,Block 4 (Satpura),13.005987,74.795638,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_block5,hostel_b_block5,Block 5 (Nilgiri),13.005462,74.794689,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_block6,hostel_b_block6,Block 6 (Pushpagiri),13.008460,74.798271,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_block7,hostel_b_block7,Block 7 (Sahyadri),13.007934,74.796329,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_block8,hostel_b_block8,Block 8 (Trishul),13.007388,74.793959,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_mt1,hostel_b_mt1,Mega Tower 1 (Everest),13.007744,74.794808,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_mt2,hostel_b_mt2,Mega Tower 2 (Himalaya),13.006896,74.795227,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_mt3,hostel_b_mt3,Mega Tower 3 (Kailash),13.006347,74.794452,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_brahmagiri,hostel_b_brahmagiri,Brahmagiri PG Hostel,13.008577,74.797394,EAST,hostel_boys,openstreetmap,high
+node_hostel_b_shivalik,hostel_b_shivalik,Shivalik (XI Hostel),13.008111,74.793740,EAST,hostel_boys,openstreetmap,high
+node_hostel_g_gh1,hostel_g_gh1,GH 1 (Ganga),13.013300,74.795200,EAST,hostel_girls,estimated,medium
+node_hostel_g_gh2,hostel_g_gh2,GH 2 (Kaveri),13.012898,74.794941,EAST,hostel_girls,openstreetmap,high
+node_hostel_g_gh3,hostel_g_gh3,GH 3 (Yamuna),13.012800,74.795500,EAST,hostel_girls,estimated,medium
+node_hostel_g_gh4,hostel_g_gh4,GH 4 (Sharavathi),13.012900,74.795800,EAST,hostel_girls,estimated,medium
+node_hostel_g_gh5,hostel_g_gh5,GH 5 (Netravathi),13.013170,74.796036,EAST,hostel_girls,openstreetmap,high
+node_hostel_g_gh6,hostel_g_gh6,GH 6 (Godavari),13.012699,74.796019,EAST,hostel_girls,openstreetmap,high
+node_mess_gb,mess_gb,GB Mess,13.007800,74.795800,EAST,mess,estimated,medium
+node_mess_pg_new_brahmagiri,mess_pg_new_brahmagiri,PG-New Brahmagiri,13.008500,74.797450,EAST,mess,estimated,high
+node_mess_pg_pushpagiri,mess_pg_pushpagiri,PG-Pushpagiri,13.008400,74.798300,EAST,mess,estimated,high
+node_mess_b1_karavali,mess_b1_karavali,B1: Karavali,13.008050,74.797300,EAST,mess,estimated,high
+node_mess_b2_aravali,mess_b2_aravali,B2: Aravali,13.007150,74.797200,EAST,mess,estimated,high
+node_mess_b3_vindhya,mess_b3_vindhya,B3: Vindhya,13.006450,74.796400,EAST,mess,estimated,high
+node_mess_b4_satpura,mess_b4_satpura,B4: Satpura,13.005950,74.795600,EAST,mess,estimated,high
+node_mess_b5_nilgiri,mess_b5_nilgiri,B5: Nilgiri,13.005450,74.794650,EAST,mess,estimated,high
+node_mess_b7_sahyadri,mess_b7_sahyadri,B7: Sahyadri,13.007900,74.796300,EAST,mess,estimated,high
+node_mess_b8_trishul,mess_b8_trishul,B8: Trishul,13.007400,74.793900,EAST,mess,estimated,high
+node_mess_mega,mess_mega,Mega Mess,13.007497,74.795291,EAST,mess,openstreetmap,high

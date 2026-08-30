@@ -1,0 +1,15 @@
+{
+  "description": "Simulation assumptions for NITK campus mobility transit speeds across road types. These are conservative simulation parameters and not empirical NITK measurements.",
+  "speed_kmh": {
+    "internal_campus_road": 20.0,
+    "slow_campus_road": 15.0,
+    "underpass_crossing": 15.0,
+    "walking_path": 5.0
+  },
+  "notes": {
+    "internal_campus_road": "Primary paved campus thoroughfares (e.g. NITK Spine, Main Gate Road, Main Building Ring Road, Beach Road).",
+    "slow_campus_road": "Hostel interior lanes, delivery alleys, and mess access paths.",
+    "underpass_crossing": "Vehicle underpass passage beneath NH-66 connecting East and West campus.",
+    "walking_path": "Pedestrian footpaths, overpass steps, and building entrance walkways."
+  }
+}

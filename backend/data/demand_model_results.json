@@ -1,0 +1,28 @@
+{
+  "total_rows": 154224,
+  "training_rows": 107956,
+  "validation_rows": 23134,
+  "test_rows": 23134,
+  "feature_count": 82,
+  "model": "RandomForestRegressor",
+  "model_version": "phase4-random-forest-v1",
+  "baseline": {
+    "mae": 0.06431178765876412,
+    "rmse": 0.19240869182549178,
+    "r2": 0.007176141769750344
+  },
+  "validation": {
+    "mae": 0.057584830038641996,
+    "rmse": 0.18644742656785218,
+    "r2": 0.009108577812523833
+  },
+  "test": {
+    "mae": 0.06302429838647697,
+    "rmse": 0.19319814545964015,
+    "r2": -0.0009876926077694304
+  },
+  "mean_actual_test_demand": 0.033111437710728796,
+  "mean_predicted_test_demand": 0.03998092794763525,
+  "max_actual_test_demand": 3.0,
+  "max_predicted_test_demand": 1.3988720821662002
+}

@@ -1,0 +1,136 @@
+{
+  "description": "Configuration parameters for synthetic campus ride-request simulation. These are simulation parameters and not empirical NITK statistics.",
+  "simulation_defaults": {
+    "start_date": "2026-09-01",
+    "num_days": 30,
+    "base_requests_per_day": 170,
+    "default_seed": 42
+  },
+  "time_periods": [
+    {
+      "period_id": "early_morning",
+      "name": "Early Morning",
+      "start_time": "05:00",
+      "end_time": "07:00",
+      "weight_column": "morning_demand_weight",
+      "relative_rate": 0.05,
+      "flow_preferences": {
+        "hostel_to_gate": 0.30,
+        "hostel_to_academic": 0.40,
+        "hostel_to_mess": 0.20,
+        "general": 0.10
+      }
+    },
+    {
+      "period_id": "morning_peak",
+      "name": "Morning Peak (Class Rush)",
+      "start_time": "07:00",
+      "end_time": "10:00",
+      "weight_column": "morning_demand_weight",
+      "relative_rate": 0.28,
+      "flow_preferences": {
+        "hostel_to_lecture_hall": 0.45,
+        "hostel_to_department": 0.35,
+        "hostel_to_library": 0.10,
+        "general": 0.10
+      }
+    },
+    {
+      "period_id": "mid_day",
+      "name": "Mid-Day Classes & Labs",
+      "start_time": "10:00",
+      "end_time": "12:00",
+      "weight_column": "peak_demand_weight",
+      "relative_rate": 0.10,
+      "flow_preferences": {
+        "department_to_department": 0.40,
+        "academic_to_library": 0.30,
+        "academic_to_hostel": 0.20,
+        "general": 0.10
+      }
+    },
+    {
+      "period_id": "lunch_peak",
+      "name": "Lunch Period Peak",
+      "start_time": "12:00",
+      "end_time": "14:30",
+      "weight_column": "lunch_demand_weight",
+      "relative_rate": 0.24,
+      "flow_preferences": {
+        "department_to_mess": 0.50,
+        "lecture_hall_to_mess": 0.30,
+        "library_to_mess": 0.10,
+        "general": 0.10
+      }
+    },
+    {
+      "period_id": "afternoon",
+      "name": "Afternoon Academic & Lab Sessions",
+      "start_time": "14:30",
+      "end_time": "17:00",
+      "weight_column": "peak_demand_weight",
+      "relative_rate": 0.10,
+      "flow_preferences": {
+        "mess_to_department": 0.35,
+        "department_to_library": 0.25,
+        "department_to_hostel": 0.25,
+        "general": 0.15
+      }
+    },
+    {
+      "period_id": "evening_peak",
+      "name": "Evening Library & Commercial Peak",
+      "start_time": "17:00",
+      "end_time": "20:00",
+      "weight_column": "evening_demand_weight",
+      "relative_rate": 0.15,
+      "flow_preferences": {
+        "hostel_to_library": 0.30,
+        "department_to_library": 0.20,
+        "hostel_to_suprabha": 0.20,
+        "hostel_to_coop": 0.15,
+        "general": 0.15
+      }
+    },
+    {
+      "period_id": "night",
+      "name": "Night Return to Hostels",
+      "start_time": "20:00",
+      "end_time": "23:00",
+      "weight_column": "night_demand_weight",
+      "relative_rate": 0.08,
+      "flow_preferences": {
+        "library_to_hostel": 0.40,
+        "suprabha_to_hostel": 0.25,
+        "coop_to_hostel": 0.15,
+        "department_to_hostel": 0.15,
+        "general": 0.05
+      }
+    }
+  ],
+  "request_type_distribution": {
+    "student": 0.85,
+    "staff": 0.10,
+    "faculty": 0.05
+  },
+  "passenger_count_distribution": {
+    "1": 0.70,
+    "2": 0.20,
+    "3": 0.07,
+    "4": 0.03
+  },
+  "priority_distribution": {
+    "normal": 0.90,
+    "high": 0.10
+  },
+  "max_wait_minutes": {
+    "normal": {
+      "min": 8.0,
+      "max": 15.0
+    },
+    "high": {
+      "min": 4.0,
+      "max": 8.0
+    }
+  }
+}
